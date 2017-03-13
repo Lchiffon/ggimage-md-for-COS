@@ -105,6 +105,20 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
 
 这个包提供了`geom_emoji`图层，像下面这样的图，它并不需要循环来实现，可以一个图层一次性全部画出来，然而如果我想`y>0`画一种`emoji`，而`y<=0`画另一种`emoji`表情，就得自己切数据，然后分两个图层来加。
 
+```r
+set.seed(123)
+iris2 <- iris[sample(1:nrow(iris), 30),]
+model <- lm(Petal.Length ~ Sepal.Length, data=iris2)
+iris2$fitted <- predict(model)
+p <- ggplot(iris2, aes(x=fitted, y=Petal.Length-fitted)) + geom_linerange(aes(ymin = 0, ymax = Petal.Length - fitted), colour = "purple") + geom_hline(aes(yintercept = 0)) + ggtitle("Residual Distribution")+ylab("Residual")
+
+baseurl <- "https://twemoji.maxcdn.com/72x72/"
+emoji <- paste0(baseurl, c("1f600", "1f622"), ".png")
+
+p + geom_image(aes(image=emoji[with(iris2, abs(Petal.Length-fitted)>2)+1])) + coord_fixed()
+```
+
+![](figures/emoji_residual.png)
 
 ```r
 emoji <- "https://twemoji.maxcdn.com/72x72/1f63b.png"
@@ -144,6 +158,44 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=image))
 ![](figures/Screen Shot 2017-02-27 at 7.39.54 PM.png)
 
 
+````r
+library(rvest)
+library(dplyr)
+
+url <- "http://www.nbcolympics.com/medals"
+
+medals <- read_html(url) %>%
+    html_nodes("table") %>%
+    html_table() %>% .[[1]]
+  
+library(countrycode)
+library(tidyr)
+
+medals <- medals %>%
+    mutate(code = countrycode(Country, "country.name", "iso2c")) %>% gather(medal, count, Gold:Bronze) %>% filter(Total >= 10)
+
+
+baseurl <- "https://behdad.github.io/region-flags/png/"
+flags <- paste0(baseurl, medals$code, ".png")
+names(flags) <- medals$code
+
+p <- ggplot(medals, aes(Country, count)) + geom_col(aes(fill=medal), width=.8)
+
+p+geom_image(y = -2, aes(image = flags[code])) + coord_flip() + expand_limits(y=-2)  + scale_fill_manual(values = c("Gold" = "gold", "Bronze" = "#cd7f32","Silver" = "#C0C0C0"))
+```
+
+![](figures/olympics2016.png)
+
+## 实例应用
+
+SAS博客对M&M巧克力的颜色分布做了分析，通过simulation估计不同颜色的置信区间。这个分析被翻译成R，并产生下图：
+
+![](figures/mm.png)
+
+其中垂直片段**|**是真实值，而估计值用了ggimage来画不同颜色的巧克力，水平片段当然就是置信空间了。
+
+
+
 ----
 
 **References**
@@ -155,3 +207,5 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=image))
 + <https://github.com/sckott/rphylopic>
 + <https://github.com/baptiste/ggflags>
 + <http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html>
++ <http://blogs.sas.com/content/iml/2017/02/20/proportion-of-colors-mandms.html>
++ <http://rpubs.com/hrbrmstr/mms>
