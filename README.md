@@ -2,12 +2,47 @@
 
 > 作者简介：余光创，香港大学公共卫生学院，生物信息学博士生。个人公众号：biobabble
 
+
+## 图上嵌图片
+
+
+Base plot可以在做图的时候嵌入图片，使用的是`graphics::rasterImage`：
+
+```r
+imgurl <- "http://phylopic.org/assets/images/submissions/295cd9f7-eef2-441e-ba7e-40c772ca7611.256.png"
+library(EBImage)
+x <- readImage(imgurl)
+plot(1, type="n", xlab="", ylab="", xlim=c(0, 8), ylim=c(0, 8))
+rasterImage(x, 2, 2, 6, 4)
+```
+
+![](figures/base_rasterImage.png)
+
+
+
 如果我们搜索"ggplot2 image"，会找到类似于下面这样的帖子/博文：
 
 + r - Inserting an image to ggplot2 - Stack Overflow
 + Add a background png image to ggplot2 | R-bloggers
 
-都是使用`annotation_custom(rasterGrob)`来把图片加到ggplot2图形中，这类似于`graphics::rasterImage`之于base plot。也就是说在`ggplot2`中使用图片是可行的，然而如果我们要使用图片来打点画一个散点图，我们需要`for`循环，对每一个点进行操作，这显然是low level的操作，而`ggplot2`是一个高抽象的画图系统，我们希望能够使用`ggplot2`的语法。
+也就是说通过程序员秘笈，搜索SO，我们用ggplot2同样也可以做到。
+
+这里我们需要用到`annotation_custom(rasterGrob)`来把图片加到ggplot2图形中，这和base plot是一模一样的。
+
+
+```r
+library(grid)
+library(ggplot2)
+
+p <- ggplot(d=data.frame(x=c(0,8), y=c(0,8)), aes(x,y)) + geom_blank()
+p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
+```
+
+
+![](figures/ggplot2_rasterGrob.png)
+
+
+如果要使用图片来打点画一个散点图，我们就需要`for`循环，对每一个点进行操作，这显然是low level的操作，而`ggplot2`是一个高抽象的画图系统，我们希望能够使用`ggplot2`的语法。
 
 `ggimage`就是来实现这样一个功能，它只是一个简单的包，允许我们在ggplot2中把离散性变量映射到不同的图片来画图。
 
