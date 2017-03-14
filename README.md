@@ -66,6 +66,9 @@ SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/con
 
 其中垂直片段|是真实值，水平片段当然就是置信空间了，而估计值用了`ggimage`来画不同颜色的巧克力。
 
+另一个例子是[迪斯尼电影主人公名字的流行程度](https://rpubs.com/bhaskarvk/disney):
+
+![](figures/Screenshot3.png)
 
 `ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，就像上面`M&M`巧克力颜色分布一样。
 
@@ -243,3 +246,4 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=pie[(y>0)+1]))
 + <http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html>
 + <http://blogs.sas.com/content/iml/2017/02/20/proportion-of-colors-mandms.html>
 + <http://rpubs.com/hrbrmstr/mms>
++ <https://rpubs.com/bhaskarvk/disney>
