@@ -64,7 +64,7 @@ SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/con
 
 ![](figures/mm.png)
 
-其中垂直片段**|**是真实值，水平片段当然就是置信空间了，而估计值用了`ggimage`来画不同颜色的巧克力。
+其中垂直片段|是真实值，水平片段当然就是置信空间了，而估计值用了`ggimage`来画不同颜色的巧克力。
 
 
 `ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，就像上面`M&M`巧克力颜色分布一样。
@@ -72,7 +72,7 @@ SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/con
 
 前面提到的其它包，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
 
-**`CatterPlots`**这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[revolutionanalytics有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
+__`CatterPlots`__这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[revolutionanalytics有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
 
 
 ```r
@@ -92,7 +92,7 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
 
 ![](figures/ggimage_CatterPlots.png)
 
-`CatterPlots`实现的方式就是上面谈到的`rasterImage`内部使用了循环。**`rphylopic`**同时支持base plot和`ggplot2`，也是一样的实现方式，不过`rphylopic`内部没有使用循环，一次只能加一个图，它使用的图来自于[phylopic](http://phylopic.org/)数据库。
+`CatterPlots`实现的方式就是上面谈到的`rasterImage`内部使用了循环。__`rphylopic`__同时支持base plot和`ggplot2`，也是一样的实现方式，不过`rphylopic`内部没有使用循环，一次只能加一个图，它使用的图来自于[phylopic](http://phylopic.org/)数据库。
 
 
 我们用`ggimage`同样可以使用`phylopic`图片：
@@ -107,7 +107,7 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
 > 图中是`翼足目`动物。
 
 
-**`emoGG`**是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的`showtext`基础上，把`emoji`当做普通字体一样操作，更方便。
+__`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的`showtext`基础上，把`emoji`当做普通字体一样操作，更方便。
 
 这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，像下面这样的图，就得分成两次，一次画笑脸，一次画哭脸，分别对应于残差是否大于0.5。
 
@@ -129,10 +129,10 @@ emoji <- paste0(baseurl, c("1f600", "1f622"), ".png")
 p + geom_image(aes(image=emoji[(abs(Petal.Length-fitted)>0.5)+1]))
 ```
 
-![](figures/emoji_residual.png)
+![](figures/emoji_residual2.png)
 
 
-`aes`映射是`ggplot2`语法的强大之处，让我们可以在更高的抽像水平思考，**`ggflags`**是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示在图片中加入国旗。
+`aes`映射是`ggplot2`语法的强大之处，让我们可以在更高的抽像水平思考，__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示在图片中加入国旗。
 
 
 ```r
