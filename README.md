@@ -2,7 +2,7 @@
 
 > 作者简介：余光创，香港大学公共卫生学院，生物信息学博士生。
 > 
-> 个人主页：<https://guangchuangyu.github.io>， 公众号：biobabble
+> 博客：<https://guangchuangyu.github.io>， 公众号：biobabble
 
 
 ## 图上嵌图片
@@ -52,7 +52,7 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 ![](figures/Screenshot1.png)
 
 
-实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是一些分类学的研究，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会在一些图片放在进化树上来展示病毒的宿主信息。`ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
+实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是一些分类学的研究，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会把一些图片放在进化树上来展示病毒的宿主信息。`ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
 
 ## 实例分析
 
@@ -70,7 +70,7 @@ SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/con
 
 ![](figures/Screenshot3.png)
 
-`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，就像上面`M&M`巧克力颜色分布一样。
+`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，就像上面两个例子一样。
 
 
 前面提到的其它包，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
@@ -135,7 +135,7 @@ p + geom_image(aes(image=emoji[(abs(Petal.Length-fitted)>0.5)+1]))
 ![](figures/emoji_residual2.png)
 
 
-`aes`映射是`ggplot2`语法的强大之处，让我们可以在更高的抽像水平思考，__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示在图片中加入国旗。
+`aes`映射是`ggplot2`语法的强大之处，让我们可以在更高的抽像水平思考，__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示做图时加入国旗。
 
 
 ```r
@@ -201,7 +201,7 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1) +
 
 #### 嵌套式绘图
 
-这里通过base plot和ggplot2分别画饼图，还使用之前的正弦函数，把`y>=0`的用base plot画出来的饼图打点，把`y<0`用ggplot2画出来的饼图来打点。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上画个某些地方的相关统计信息。
+这里通过base plot和ggplot2分别画饼图，还使用之前的正弦函数，把`y>=0`的用base plot画出来的饼图打点，把`y<0`用ggplot2画出来的饼图来打点。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上加个某些地方的相关统计信息（如果要在地图上画饼图，可以使用我写的[scatterpie](https://cran.r-project.org/package=scatterpie)包）。
 
 ```r
 bpie <- tempfile(fileext=".png")
@@ -228,7 +228,7 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=pie[(y>0)+1]))
 后续我有时间的话，会写一个`draw_key_image`的函数，实现使用图片来当legend key的功能，也会把`ggtree::subview`和`ggtree::phylopic`这些也搬过来。
 
 
-祝大家图片玩得开心！
+祝大家玩得开心！
 
 ![](figures/Screenshot2.png)
 
@@ -247,3 +247,4 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=pie[(y>0)+1]))
 + <http://blogs.sas.com/content/iml/2017/02/20/proportion-of-colors-mandms.html>
 + <http://rpubs.com/hrbrmstr/mms>
 + <https://rpubs.com/bhaskarvk/disney>
++ <https://cran.r-project.org/package=scatterpie>
