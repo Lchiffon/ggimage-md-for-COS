@@ -49,7 +49,7 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 `ggimage`就是来实现这样一个功能，它只是一个简单的包，允许我们在ggplot2中把离散性变量映射到不同的图片来画图。
 
 
-![](figures/Screen Shot 2017-02-27 at 7.40.08 PM.png)
+![](figures/Screenshot1.png)
 
 
 实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是一些分类学的研究，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会在一些图片放在进化树上来展示病毒的宿主信息。`ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
@@ -176,10 +176,7 @@ p <- ggplot(medals, aes(Country, count)) + geom_col(aes(fill=medal), width=.8)
 p+geom_image(y = -2, aes(image = flags[code])) + coord_flip() + expand_limits(y=-2)  + scale_fill_manual(values = c("Gold" = "gold", "Bronze" = "#cd7f32","Silver" = "#C0C0C0"))
 ```
 
-
-![](figures/olympics2016.png)
-
-
+![](figures/Olympics2016.png)
 
 ## `ggimage`
 
@@ -230,7 +227,7 @@ ggplot(d, aes(x, y)) + geom_image(aes(image=pie[(y>0)+1]))
 
 祝大家图片玩得开心！
 
-![](figures/Screen Shot 2017-02-27 at 7.39.54 PM.png)
+![](figures/Screenshot2.png)
 
 > 感谢大为、太云和雪宁的校稿，特别是大为提出很多修改意见以及给出了用R画R的例子。
 
