@@ -176,7 +176,7 @@ p <- ggplot(medals, aes(Country, count)) + geom_col(aes(fill=medal), width=.8)
 p+geom_image(y = -2, aes(image = flags[code])) + coord_flip() + expand_limits(y=-2)  + scale_fill_manual(values = c("Gold" = "gold", "Bronze" = "#cd7f32","Silver" = "#C0C0C0"))
 ```
 
-![](figures/Olympics2016.png)
+![](figures/olympics_2016.png)
 
 ## `ggimage`
 
