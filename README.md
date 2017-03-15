@@ -1,7 +1,7 @@
 # ggimage：ggplot2中愉快地使用图片
 
 > 作者简介：余光创，香港大学公共卫生学院，生物信息学博士生。
-> 
+>
 > 博客：<https://guangchuangyu.github.io>， 公众号：biobabble
 
 
@@ -56,24 +56,8 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 
 ## 实例分析
 
-据我所知目前支持使用图片的R包有`CatterPlots`, `rphylopic`, `emoGG`, `ggflags`这几个，都是为特定的目的而实现的。
-
-而`ggimage`是通用的，这里先介绍一个实例：
-
-SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/content/iml/2017/02/20/proportion-of-colors-mandms.html)，通过simulation估计不同颜色的置信区间。这个[分析被翻译成R](http://rpubs.com/hrbrmstr/mms)，并产生下图：
-
-![](figures/mm.png)
-
-其中垂直片段|是真实值，水平片段当然就是置信空间了，而估计值用了`ggimage`来画不同颜色的巧克力。
-
-另一个例子是[迪斯尼电影主人公名字的流行程度](https://rpubs.com/bhaskarvk/disney):
-
-![](figures/Screenshot3.png)
-
-`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，就像上面两个例子一样。
-
-
-前面提到的其它包，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
+据我所知目前支持使用图片的R包有`CatterPlots`, `rphylopic`, `emoGG`,
+`ggflags`这几个，都是为特定的目的而实现的，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
 
 __`CatterPlots`__这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[revolutionanalytics有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
 
@@ -120,7 +104,7 @@ iris2 <- iris[sample(1:nrow(iris), 30),]
 model <- lm(Petal.Length ~ Sepal.Length, data=iris2)
 iris2$fitted <- predict(model)
 
-p <- ggplot(iris2, aes(x=Sepal.Length, y=Petal.Length)) + 
+p <- ggplot(iris2, aes(x=Sepal.Length, y=Petal.Length)) +
   geom_linerange(aes(ymin = fitted, ymax = Petal.Length),
                  colour = "purple") +
   geom_abline(intercept = model$coefficients[1],
@@ -147,14 +131,14 @@ url <- "http://www.nbcolympics.com/medals"
 medals <- read_html(url) %>%
     html_nodes("table") %>%
     html_table() %>% .[[1]]
-  
+
 library(countrycode)
 library(tidyr)
 
 medals <- medals %>%
     mutate(code = countrycode(Country, "country.name", "iso2c")) %>% gather(medal, count, Gold:Bronze) %>% filter(Total >= 10)
 
-head(medals)    
+head(medals)
 ```
 
 |Country       | Total|code |medal | count|
@@ -195,46 +179,97 @@ d <- data.frame(x=x, y=y)
 img <- system.file("img", "Rlogo.png", package="png")
 ggplot(d, aes(x, y)) + geom_image(image=img, size=.1) +
   xlim(0,6) + ylim(0,7)
-```  
+```
 
 ![](figures/R.png)
 
 #### 嵌套式绘图
 
-这里通过base plot和ggplot2分别画饼图，还使用之前的正弦函数，把`y>=0`的用base plot画出来的饼图打点，把`y<0`用ggplot2画出来的饼图来打点。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上加个某些地方的相关统计信息（如果要在地图上画饼图，可以使用我写的[scatterpie](https://cran.r-project.org/package=scatterpie)包）。
+这里我要展示的是非常有名的bubble plot，但bubble不是圆圈，而是使用
+`ggplot2`画的饼图，我先把饼图保存起来，再用`ggimage`拿来画，饼图的大小
+与人口总数正相关。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上加个某些地方的相关统计信息（如果要在地图上画饼图，可以使用我写的[scatterpie](https://cran.r-project.org/package=scatterpie)包）。
 
 ```r
-bpie <- tempfile(fileext=".png")
-gpie <- tempfile(fileext=".png")
-dd <- data.frame(x=LETTERS[1:24], y=1, color=rainbow(24))
-ggplot(d, aes(x, y, fill=I(color))) + geom_col() + coord_polar(theta='x') + ggsave(gpie)
+require(dplyr)
+require(tidyr)
+require(ggplot2)
+require(gtable)
+require(ggtree)
 
-png(bpie)
-pie(dd$y, col=dd$color)
-dev.off()
+crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv", header=TRUE, sep="\t", stringsAsFactors=F)
 
-x <- seq(-2*pi, 2*pi, length.out=30)
-d <- data.frame(x=x, y=sin(x))
+plot_pie <- function(i) {
+    df <- gather(crime[i,], type, value, murder:motor_vehicle_theft)
+    ggplot(df, aes(x=1, value,fill=type)) +
+        geom_col() + coord_polar(theta = 'y') +
+        ggtitle(crime[i, "state"]) +
+        theme_void() + theme_transparent() +
+        theme(legend.position = "none",
+              plot.title = element_text(size=rel(10), hjust=0.5))
+}
 
-ggplot(d, aes(x, y)) + geom_image(aes(image=pie[(y>0)+1]))
+pies <- sapply(1:nrow(crime), function(i) {
+    outfile <- paste0("crime_", i, ".png")
+    plot_pie(i) + ggsave(outfile, bg="transparent")
+    outfile
+})
+
+radius <- sqrt(crime$population / pi)
+crime$radius <- 0.2*radius/max(radius)
+crime$pie <- pies
+
+leg1 <- gtable_filter(ggplot_gtable(ggplot_build(plot_pie(1) + theme(legend.position="right"))), "guide-box")
+
+p <- ggplot(crime, aes(murder, Robbery)) + geom_image(aes(image=pie, size=I(radius)))
+subview(p, leg1, x=8.8, y=50)
 ```
 
-![](figures/pie_line.png)
+![](figures/crime.png)
+
+
+```r
+plot_crime <- function(i) {
+    p <- ggplot(crime, aes(murder, Robbery)) + geom_blank() + geom_image(data=crime[i,], aes(image=pie, size=I(radius)))
+    p <- subview(p, leg1, x=8.8, y=50)
+    p
+    o = paste0(i, ".png")
+    ggsave(o, p, width=12, height=12)
+    o
+}
+
+require(magick)
+require(purrr)
+order(crime$murder, decreasing=F) %>% map(plot_crime) %>% map(image_read) %>% image_join() %>% image_animate(fps=3) %>% image_write("crime.gif")
+```
 
 
 `ggtree`的`subview`函数可以图上嵌图，并不需要保存为图片，但对于`ggplot2`来讲，保存图片也是有好处的，因为`ggplot2`画图，点线是在数据空间上，随着我们保存图片的大小是按比例缩小或放大的，但文字是在像素空间上，和画图空间并不相关。所以当我们嵌图时缩小了画图窗口之后，字体会显得格外大，微调起来也比较繁琐，这时候保存为合适尺寸的图片，再用`ggimage`来加上去，显然就轻松得多。
 
 
-后续我有时间的话，会写一个`draw_key_image`的函数，实现使用图片来当legend key的功能，也会把`ggtree::subview`和`ggtree::phylopic`这些也搬过来。
+#### 其它来自R社区的例子
+
+SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/content/iml/2017/02/20/proportion-of-colors-mandms.html)，通过simulation估计不同颜色的置信区间。这个[分析被翻译成R](http://rpubs.com/hrbrmstr/mms)，并产生下图：
+
+![](figures/mm.png)
+
+其中垂直片段|是真实值，水平片段当然就是置信空间了，而估计值用了`ggimage`来画不同颜色的巧克力。
 
 
-祝大家玩得开心！
+另一个例子是[迪斯尼电影主人公名字的流行程度](https://rpubs.com/bhaskarvk/disney):
+
+![](figures/Screenshot3.png)
+
+
+`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，后续我有时间的话，会写一个`draw_key_image`的函数，实现使用图片来当legend key的功能，也会把`ggtree::subview`和`ggtree::phylopic`这些也搬过来。
+
+
+最后祝大家玩得开心！不要把图画得太有魔性哦:)
 
 ![](figures/Screenshot2.png)
 
 > 感谢大为、太云和雪宁的校稿，特别是大为提出很多修改意见以及给出了用R画R的例子。
 
- 
+
 ## References
 
 + <https://stackoverflow.com/questions/9917049/inserting-an-image-to-ggplot2>
