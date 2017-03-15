@@ -36,7 +36,8 @@ rasterImage(x, 2, 2, 6, 4)
 library(grid)
 library(ggplot2)
 
-p <- ggplot(d = data.frame(x = c(0, 8), y = c(0, 8)), aes(x, y)) + geom_blank()
+p <- ggplot(d = data.frame(x = c(0, 8), y = c(0, 8)), aes(x, y)) +
+	geom_blank()
 p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 ```
 
@@ -68,7 +69,7 @@ biocLite("ggimage")
 #### 方法2：不通过biocLite
 
 ```r
-setRepositories(ind=1:2)
+setRepositories(ind = 1:2)
 install.packages("ggimage")
 ```
 
@@ -123,7 +124,7 @@ __`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我�
 ```r
 set.seed(123)
 iris2 <- iris[sample(1:nrow(iris), 30),]
-model <- lm(Petal.Length ~ Sepal.Length, data=iris2)
+model <- lm(Petal.Length ~ Sepal.Length, data = iris2)
 iris2$fitted <- predict(model)
 
 p <- ggplot(iris2, aes(x = Sepal.Length, y = Petal.Length)) +
@@ -143,7 +144,8 @@ p + geom_image(aes(image = emoji[(abs(Petal.Length-fitted) > 0.5) + 1]))
 如果要用`emoGG`来做的话，则需要自己切数据分两次来进行：
 
 ```r
-p + geom_emoji(data=subset(iris2, (Petal.Length-fitted)<0.5), emoji="1f600") + geom_emoji(data=subset(iris2, (Petal.Length-fitted)>0.5), emoji="1f622")
+p + geom_emoji(data = subset(iris2, (Petal.Length - fitted)<0.5), emoji = "1f600") +
+	geom_emoji(data = subset(iris2, (Petal.Length - fitted)>0.5), emoji = "1f622")
 ```
 
 这里我们只分两类(残差是否大于0.5)，所以需要加两次，试想我们有个分类变量，有多种可能的取值，则我们需要分多次切数据加图层，`CatterPlots`、`rphylopic`和`emoGG`都有这个问题，这也是`aes`映射之于`ggplot2`的重要和强大之处，它让我们可以在更高的抽像水平思考，
@@ -165,7 +167,8 @@ library(countrycode)
 library(tidyr)
 
 medals <- medals %>%
-    mutate(code = countrycode(Country, "country.name", "iso2c")) %>% gather(medal, count, Gold:Bronze) %>% filter(Total >= 10)
+    mutate(code = countrycode(Country, "country.name", "iso2c")) %>%
+	gather(medal, count, Gold:Bronze) %>% filter(Total >= 10)
 
 head(medals)
 ```
@@ -187,9 +190,14 @@ baseurl <- "https://behdad.github.io/region-flags/png/"
 flags <- paste0(baseurl, medals$code, ".png")
 names(flags) <- medals$code
 
-p <- ggplot(medals, aes(Country, count)) + geom_col(aes(fill=medal), width=.8)
+p <- ggplot(medals, aes(Country, count)) +
+	geom_col(aes(fill = medal), width = .8)
 
-p+geom_image(y = -2, aes(image = flags[code])) + coord_flip() + expand_limits(y=-2)  + scale_fill_manual(values = c("Gold" = "gold", "Bronze" = "#cd7f32","Silver" = "#C0C0C0"))
+p + geom_image(y = -2, aes(image = flags[code])) +
+ coord_flip() + expand_limits(y = -2)  +
+ scale_fill_manual(values = c("Gold" = "gold", 
+							  "Bronze" = "#cd7f32",
+							  "Silver" = "#C0C0C0"))
 ```
 
 ![](figures/olympics_2016.png)
@@ -203,11 +211,11 @@ p+geom_image(y = -2, aes(image = flags[code])) + coord_flip() + expand_limits(y=
 ```r
 x <- c(2,2,2,2,2,3,3,3.5,3.5,4)
 y <- c(2,3,4,5,6,4,6,3,5,2)
-d <- data.frame(x=x, y=y)
+d <- data.frame(x = x, y = y)
 
-img <- system.file("img", "Rlogo.png", package="png")
-ggplot(d, aes(x, y)) + geom_image(image=img, size=.1) +
-  xlim(0,6) + ylim(0,7)
+img <- system.file("img", "Rlogo.png", package = "png")
+ggplot(d, aes(x, y)) + geom_image(image = img, size = .1) +
+  xlim(0, 6) + ylim(0, 7)
 ```
 
 ![](figures/R.png)
@@ -225,21 +233,24 @@ require(ggplot2)
 require(gtable)
 require(ggtree)
 
-crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv", header=TRUE, sep="\t", stringsAsFactors=F)
+crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv",
+ header = TRUE, sep = "\t", stringsAsFactors = F)
 
 plot_pie <- function(i) {
-    df <- gather(crime[i,], type, value, murder:motor_vehicle_theft)
-    ggplot(df, aes(x=1, value,fill=type)) +
+    df <- gather(crime[i,], type, value,
+		murder:motor_vehicle_theft)
+    ggplot(df, aes(x = 1, value,fill = type)) +
         geom_col() + coord_polar(theta = 'y') +
         ggtitle(crime[i, "state"]) +
         theme_void() + theme_transparent() +
         theme(legend.position = "none",
-              plot.title = element_text(size=rel(10), hjust=0.5))
+              plot.title = element_text(size = rel(10),
+										hjust = 0.5))
 }
 
 pies <- sapply(1:nrow(crime), function(i) {
     outfile <- paste0("crime_", i, ".png")
-    plot_pie(i) + ggsave(outfile, bg="transparent")
+    plot_pie(i) + ggsave(outfile, bg = "transparent")
     outfile
 })
 
@@ -247,10 +258,13 @@ radius <- sqrt(crime$population / pi)
 crime$radius <- 0.2*radius/max(radius)
 crime$pie <- pies
 
-leg1 <- gtable_filter(ggplot_gtable(ggplot_build(plot_pie(1) + theme(legend.position="right"))), "guide-box")
+leg1 <- gtable_filter(ggplot_gtable(
+			ggplot_build(plot_pie(1) +
+				theme(legend.position = "right"))), "guide-box")
 
-p <- ggplot(crime, aes(murder, Robbery)) + geom_image(aes(image=pie, size=I(radius)))
-subview(p, leg1, x=8.8, y=50)
+p <- ggplot(crime, aes(murder, Robbery)) +
+	geom_image(aes(image = pie, size = I(radius)))
+subview(p, leg1, x = 8.8, y = 50)
 ```
 
 ![](figures/crime.png)
@@ -259,17 +273,20 @@ subview(p, leg1, x=8.8, y=50)
 
 ```r
 plot_crime <- function(i) {
-    p <- ggplot(crime, aes(murder, Robbery)) + geom_blank() + geom_image(data=crime[i,], aes(image=pie, size=I(radius)))
-    p <- subview(p, leg1, x=8.8, y=50)
+    p <- ggplot(crime, aes(murder, Robbery)) + geom_blank() +
+		geom_image(data = crime[i,], aes(image = pie, size = I(radius)))
+    p <- subview(p, leg1, x = 8.8, y = 50)
     p
     o = paste0(i, ".png")
-    ggsave(o, p, width=12, height=12)
+    ggsave(o, p, width = 12, height = 12)
     o
 }
 
 require(magick)
 require(purrr)
-order(crime$murder, decreasing=F) %>% map(plot_crime) %>% map(image_read) %>% image_join() %>% image_animate(fps=3) %>% image_write("crime.gif")
+order(crime$murder, decreasing = F) %>% map(plot_crime) %>%
+ map(image_read) %>% image_join() %>% image_animate(fps = 3) %>%
+ image_write("crime.gif")
 ```
 
 ![](figures/crime.gif)
