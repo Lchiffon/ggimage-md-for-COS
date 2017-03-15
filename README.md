@@ -41,8 +41,6 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 ```
 
 
-![](figures/ggplot2_rasterGrob.png)
-
 
 如果要使用图片来打点画一个散点图，我们就需要`for`循环，对每一个点进行操作，这显然是low level的操作，而`ggplot2`是一个高抽象的画图系统，我们希望能够使用`ggplot2`的语法。
 
@@ -55,6 +53,28 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是在一些分类学的研究中，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会把一些图片放在进化树上来展示病毒的宿主信息。
 
 `ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
+
+## 安装
+
+`ggimage`依赖于`EBImage`来读图片，这是个Bioconductor包，所以我们需要额外的动作来安装它。
+
+#### 方法1：通过biocLite
+
+```r
+source("https://www.bioconductor.org/biocLite.R")
+biocLite("ggimage")
+```
+
+### 方法2：不通过biocLite
+
+```r
+setRepositories(ind=1:2)
+install.packages("ggimage")
+```
+
+方法1是按照Bioconductor的方法，或者你也可以用`setRepositories`把Bioconductor软件仓库加进来，这样`install.packages`也可以搜索到它的包。
+
+
 
 ## 实例分析
 
@@ -98,7 +118,7 @@ ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 
 __`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的[`showtext`基础](https://cos.name/2014/01/showtext-interesting-fonts-and-graphs/)上，把`emoji`当做普通字体一样操作，更方便。
 
-这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，像下面这样的图，就得分成两次，一次画笑脸，一次画哭脸，分别对应于残差是否大于0.5。
+这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，而`ggimage`支持映射，下面的例子中我们做了一个简单的回归分析，如果残差<0.5则用笑脸，`>0.5`则用哭脸来表示。
 
 ```r
 set.seed(123)
@@ -106,11 +126,7 @@ iris2 <- iris[sample(1:nrow(iris), 30),]
 model <- lm(Petal.Length ~ Sepal.Length, data=iris2)
 iris2$fitted <- predict(model)
 
-<<<<<<< HEAD
-p <- ggplot(iris2, aes(x=Sepal.Length, y=Petal.Length)) +
-=======
 p <- ggplot(iris2, aes(x = Sepal.Length, y = Petal.Length)) +
->>>>>>> feeba9da8ab9e5cf9f1e75442ec681026c5bab55
   geom_linerange(aes(ymin = fitted, ymax = Petal.Length),
                  colour = "purple") +
   geom_abline(intercept = model$coefficients[1],
@@ -124,8 +140,15 @@ p + geom_image(aes(image = emoji[(abs(Petal.Length-fitted) > 0.5) + 1]))
 
 ![](figures/emoji_residual2.png)
 
+如果要用`emoGG`来做的话，则需要自己切数据分两次来进行：
 
-`aes`映射是`ggplot2`语法的强大之处，让我们可以在更高的抽像水平思考，__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示做图时加入国旗。
+```r
+p + geom_emoji(data=subset(iris2, (Petal.Length-fitted)<0.5), emoji="1f600") + geom_emoji(data=subset(iris2, (Petal.Length-fitted)>0.5), emoji="1f622")
+```
+
+这里我们只分两类(残差是否大于0.5)，所以需要加两次，试想我们有个分类变量，有多种可能的取值，则我们需要分多次切数据加图层，`CatterPlots`、`rphylopic`和`emoGG`都有这个问题，这也是`aes`映射之于`ggplot2`的重要和强大之处，它让我们可以在更高的抽像水平思考，
+
+__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示做图时加入国旗。
 
 
 ```r
@@ -232,6 +255,7 @@ subview(p, leg1, x=8.8, y=50)
 
 ![](figures/crime.png)
 
+我们还可以每次只打一个州的数据，制作成动图。
 
 ```r
 plot_crime <- function(i) {
@@ -248,6 +272,7 @@ require(purrr)
 order(crime$murder, decreasing=F) %>% map(plot_crime) %>% map(image_read) %>% image_join() %>% image_animate(fps=3) %>% image_write("crime.gif")
 ```
 
+![](figures/crime.gif)
 
 `ggtree`的`subview`函数可以图上嵌图，并不需要保存为图片，但对于`ggplot2`来讲，保存图片也是有好处的，因为`ggplot2`画图，点线是在数据空间上，随着我们保存图片的大小是按比例缩小或放大的，但文字是在像素空间上，和画图空间并不相关。所以当我们嵌图时缩小了画图窗口之后，字体会显得格外大，微调起来也比较繁琐，这时候保存为合适尺寸的图片，再用`ggimage`来加上去，显然就轻松得多。
 
