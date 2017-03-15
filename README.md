@@ -224,11 +224,23 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1) +
 与人口总数正相关。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上加个某些地方的相关统计信息（如果要在地图上画饼图，可以使用我写的[scatterpie](https://cran.r-project.org/package=scatterpie)包）。
 
 ```r
-require(gtable)
-require(ggtree)
-
 crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv",
                   header=TRUE, sep="\t", stringsAsFactors=F)
+```
+
+|state      | murder| Forcible_rate| Robbery| aggravated_assult| burglary| larceny_theft| motor_vehicle_theft| population|
+|:----------|------:|-------------:|-------:|-----------------:|--------:|-------------:|-------------------:|----------:|
+|Alabama    |    8.2|          34.3|   141.4|             247.8|    953.8|        2650.0|               288.3|    4627851|
+|Alaska     |    4.8|          81.1|    80.9|             465.1|    622.5|        2599.1|               391.0|     686293|
+|Arizona    |    7.5|          33.8|   144.4|             327.4|    948.4|        2965.2|               924.4|    6500180|
+|Arkansas   |    6.7|          42.9|    91.1|             386.8|   1084.6|        2711.2|               262.1|    2855390|
+|California |    6.9|          26.0|   176.1|             317.3|    693.3|        1916.5|               712.8|   36756666|
+|Colorado   |    3.7|          43.4|    84.6|             264.7|    744.8|        2735.2|               559.5|    4861515|
+
+
+```r
+require(gtable)
+require(ggtree)
 
 plot_pie <- function(i) {
     df <- gather(crime[i,], type, value, murder:motor_vehicle_theft)
