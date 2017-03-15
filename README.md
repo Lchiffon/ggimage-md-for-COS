@@ -255,7 +255,7 @@ subview(p, leg1, x=8.8, y=50)
 
 ![](figures/crime.png)
 
-我们还可以每次只打一个州的数据，制作成动图。
+我们还可以每次只画一个州的数据，制作成动图。
 
 ```r
 plot_crime <- function(i) {
