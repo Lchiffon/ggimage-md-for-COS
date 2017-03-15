@@ -14,11 +14,11 @@ Base plot可以在做图的时候嵌入图片，使用的是`graphics::rasterIma
 imgurl <- "http://phylopic.org/assets/images/submissions/295cd9f7-eef2-441e-ba7e-40c772ca7611.256.png"
 library(EBImage)
 x <- readImage(imgurl)
-plot(1, type="n", xlab="", ylab="", xlim=c(0, 8), ylim=c(0, 8))
+plot(1, type = "n", xlab = "", ylab = "", xlim = c(0, 8), ylim = c(0, 8))
 rasterImage(x, 2, 2, 6, 4)
 ```
 
-![](figures/base_rasterImage.png)
+![](figures/raster.png)
 
 
 
@@ -27,7 +27,7 @@ rasterImage(x, 2, 2, 6, 4)
 + [r - Inserting an image to ggplot2 - Stack Overflow](https://stackoverflow.com/questions/9917049/inserting-an-image-to-ggplot2)
 + [Add a background png image to ggplot2 | R-bloggers](https://www.r-bloggers.com/add-a-background-png-image-to-ggplot2/)
 
-也就是说通过程序员秘笈，搜索SO，我们用ggplot2同样也可以做到。
+也就是说通过程序员秘笈，搜索，我们用ggplot2同样也可以做到。
 
 这里我们需要用到`annotation_custom(rasterGrob)`来把图片加到ggplot2图形中，这和base plot是一模一样的。
 
@@ -36,7 +36,7 @@ rasterImage(x, 2, 2, 6, 4)
 library(grid)
 library(ggplot2)
 
-p <- ggplot(d=data.frame(x=c(0,8), y=c(0,8)), aes(x,y)) + geom_blank()
+p <- ggplot(d = data.frame(x = c(0, 8), y = c(0, 8)), aes(x, y)) + geom_blank()
 p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 ```
 
@@ -52,14 +52,16 @@ p + annotation_custom(rasterGrob(x), 2, 6, 2, 4)
 ![](figures/Screenshot1.png)
 
 
-实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是一些分类学的研究，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会把一些图片放在进化树上来展示病毒的宿主信息。`ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
+实现这个功能的想法已经酝酿很久了，在`ggtree`的开发中，我实现了`phylopic`函数来使用Phylopic数据库的图片注释进化树，也实现了`subview`函数在图上嵌入小图。用图片来注释进化树在进化分析上还是很常见的，特别是在一些分类学的研究中，需要把一些分类学特征在进化树上展示出来，而像我们做病毒，也经常会把一些图片放在进化树上来展示病毒的宿主信息。
+
+`ggtree`和可视化有关的函数分两类，一类是加注释的图层，另一类是可视化操作树（比如像旋转、合并分支）。操作树的都是普通函数，而加注释的都是`geom`图层，除了`subview`和`phylopic`，这种所谓逼死处女座的存在，我早就想改成了`geom_subview`和`geom_phylopic`了。这也是为什么我要写`ggimage`的原因了。
 
 ## 实例分析
 
 据我所知目前支持使用图片的R包有`CatterPlots`, `rphylopic`, `emoGG`,
 `ggflags`这几个，都是为特定的目的而实现的，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
 
-__`CatterPlots`__这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[revolutionanalytics有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
+__`CatterPlots`__这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[RevolutionAnalytics 有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
 
 
 ```r
@@ -67,14 +69,14 @@ library(ggplot2)
 library(ggimage)
 
 mytheme <- theme_minimal() +
-    theme(axis.title=element_blank())
+    theme(axis.title = element_blank())
 theme_set(mytheme)
 
-x <- seq(-2*pi, 2*pi, length.out=30)
-d <- data.frame(x=x, y=sin(x))
+x <- seq(-2*pi, 2*pi, length.out = 30)
+d <- data.frame(x = x, y = sin(x))
 
 img <- "http://www.belleamibengals.com/bengal_cat_2.png"
-ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
+ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 ```
 
 ![](figures/ggimage_CatterPlots.png)
@@ -86,7 +88,7 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
 
 ```r
 img <- "http://phylopic.org/assets/images/submissions/500bd7c6-71c1-4b86-8e54-55f72ad1beca.128.png"
-ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
+ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 ```
 
 ![](figures/ggimage_rphylopic.png)
@@ -94,7 +96,7 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1)
 > 图中是`翼足目`动物。
 
 
-__`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的`showtext`基础上，把`emoji`当做普通字体一样操作，更方便。
+__`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的[`showtext`基础](https://cos.name/2014/01/showtext-interesting-fonts-and-graphs/)上，把`emoji`当做普通字体一样操作，更方便。
 
 这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，像下面这样的图，就得分成两次，一次画笑脸，一次画哭脸，分别对应于残差是否大于0.5。
 
@@ -104,7 +106,11 @@ iris2 <- iris[sample(1:nrow(iris), 30),]
 model <- lm(Petal.Length ~ Sepal.Length, data=iris2)
 iris2$fitted <- predict(model)
 
+<<<<<<< HEAD
 p <- ggplot(iris2, aes(x=Sepal.Length, y=Petal.Length)) +
+=======
+p <- ggplot(iris2, aes(x = Sepal.Length, y = Petal.Length)) +
+>>>>>>> feeba9da8ab9e5cf9f1e75442ec681026c5bab55
   geom_linerange(aes(ymin = fitted, ymax = Petal.Length),
                  colour = "purple") +
   geom_abline(intercept = model$coefficients[1],
@@ -113,7 +119,7 @@ p <- ggplot(iris2, aes(x=Sepal.Length, y=Petal.Length)) +
 baseurl <- "https://twemoji.maxcdn.com/72x72/"
 emoji <- paste0(baseurl, c("1f600", "1f622"), ".png")
 
-p + geom_image(aes(image=emoji[(abs(Petal.Length-fitted)>0.5)+1]))
+p + geom_image(aes(image = emoji[(abs(Petal.Length-fitted) > 0.5) + 1]))
 ```
 
 ![](figures/emoji_residual2.png)
