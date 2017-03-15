@@ -65,7 +65,7 @@ source("https://www.bioconductor.org/biocLite.R")
 biocLite("ggimage")
 ```
 
-### 方法2：不通过biocLite
+#### 方法2：不通过biocLite
 
 ```r
 setRepositories(ind=1:2)
