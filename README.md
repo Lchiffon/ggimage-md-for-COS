@@ -219,9 +219,6 @@ ggplot(d, aes(x, y)) + geom_image(image=img, size=.1) +
 与人口总数正相关。这个例子可以应用到很多场景中去，比如一个时间序列的曲线，你要用统计图在某些时间点上展示相关的信息，比如你要在地图上加个某些地方的相关统计信息（如果要在地图上画饼图，可以使用我写的[scatterpie](https://cran.r-project.org/package=scatterpie)包）。
 
 ```r
-require(dplyr)
-require(tidyr)
-require(ggplot2)
 require(gtable)
 require(ggtree)
 
@@ -234,7 +231,7 @@ plot_pie <- function(i) {
         ggtitle(crime[i, "state"]) +
         theme_void() + theme_transparent() +
         theme(legend.position = "none",
-              plot.title = element_text(size=rel(10), hjust=0.5))
+              plot.title = element_text(size=rel(6), hjust=0.5))
 }
 
 pies <- sapply(1:nrow(crime), function(i) {
@@ -253,26 +250,24 @@ p <- ggplot(crime, aes(murder, Robbery)) + geom_image(aes(image=pie, size=I(radi
 subview(p, leg1, x=8.8, y=50)
 ```
 
-![](figures/crime.png)
+![](figures/us_crime.png)
 
 我们还可以每次只画一个州的数据，制作成动图。
 
 ```r
 plot_crime <- function(i) {
+    o <- paste0(i, ".png")
     p <- ggplot(crime, aes(murder, Robbery)) + geom_blank() + geom_image(data=crime[i,], aes(image=pie, size=I(radius)))
-    p <- subview(p, leg1, x=8.8, y=50)
-    p
-    o = paste0(i, ".png")
-    ggsave(o, p, width=12, height=12)
+    subview(p, leg1, x=8.8, y=50) + ggsave(o)
     o
 }
 
 require(magick)
 require(purrr)
-order(crime$murder, decreasing=F) %>% map(plot_crime) %>% map(image_read) %>% image_join() %>% image_animate(fps=3) %>% image_write("crime.gif")
+order(crime$murder, decreasing=F) %>% map(plot_crime) %>% map(image_read) %>% image_join() %>% image_animate(fps=2) %>% image_write("crime.gif")
 ```
 
-![](figures/crime.gif)
+![](figures/us_crime.gif)
 
 `ggtree`的`subview`函数可以图上嵌图，并不需要保存为图片，但对于`ggplot2`来讲，保存图片也是有好处的，因为`ggplot2`画图，点线是在数据空间上，随着我们保存图片的大小是按比例缩小或放大的，但文字是在像素空间上，和画图空间并不相关。所以当我们嵌图时缩小了画图窗口之后，字体会显得格外大，微调起来也比较繁琐，这时候保存为合适尺寸的图片，再用`ggimage`来加上去，显然就轻松得多。
 
