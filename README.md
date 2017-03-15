@@ -118,7 +118,7 @@ ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 
 __`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的[`showtext`基础](https://cos.name/2014/01/showtext-interesting-fonts-and-graphs/)上，把`emoji`当做普通字体一样操作，更方便。
 
-这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，而`ggimage`支持映射，下面的例子中我们做了一个简单的回归分析，如果残差<0.5则用笑脸，`>0.5`则用哭脸来表示。
+这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，而`ggimage`支持映射，下面的例子中我们做了一个简单的回归分析，如果残差<0.5用笑脸表示，`>0.5`则用哭脸来表示。
 
 ```r
 set.seed(123)
