@@ -244,8 +244,8 @@ crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv",
 
 
 ```r
-require(gtable)
-require(ggtree)
+library(gtable)
+library(ggtree)
 
 plot_pie <- function(i) {
     df <- gather(crime[i,], type, value, murder:motor_vehicle_theft)
@@ -290,8 +290,8 @@ plot_crime <- function(i) {
     o
 }
 
-require(magick)
-require(purrr)
+library(magick)
+library(purrr)
 order(crime$murder, decreasing=F) %>%
     map(plot_crime) %>%
     map(image_read) %>%
