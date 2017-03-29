@@ -84,7 +84,8 @@ install.packages("ggimage")
 ## 实例分析
 
 据我所知目前支持使用图片的R包有`CatterPlots`, `rphylopic`, `emoGG`,
-`ggflags`这几个，都是为特定的目的而实现的，都有其特定的应用场景，这里我将用`ggimage`来演示在这些场景中的应用实例。
+`ggflags`这几个，都是为特定的目的而实现的，都有其特定的应用场景，而`ggimage`是的
+`geom_image`是通用的，通过对它进行简单的包装，同样可以实现这些特殊场景的应用图层。
 
 __`CatterPlots`__这个包只可以应用于base plot中，通过预设的几个猫图（R对象，随包载入）来画散点图。最近[RevolutionAnalytics 有博文](http://blog.revolutionanalytics.com/2017/02/catterplots-plots-with-cats.html)介绍。`ggplot2`没有相应画猫的包。我们可以使用`ggimage`来画，而且不用限制于`CatterPlots`预设的几个图形。
 
@@ -112,8 +113,7 @@ ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 我们用`ggimage`同样可以使用`phylopic`图片：
 
 ```r
-img <- "http://phylopic.org/assets/images/submissions/500bd7c6-71c1-4b86-8e54-55f72ad1beca.128.png"
-ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
+ggplot(d, aes(x, y)) + geom_phylopic(image = "500bd7c6-71c1-4b86-8e54-55f72ad1beca", size = .1)
 ```
 
 ![](figures/ggimage_rphylopic.png)
@@ -123,7 +123,7 @@ ggplot(d, aes(x, y)) + geom_image(image = img, size = .1)
 
 __`emoGG`__是专门来画`emoji`的，如果要画`emoji`的话，我推荐我写的`emojifont`包，在轩哥的[`showtext`基础](https://cos.name/2014/01/showtext-interesting-fonts-and-graphs/)上，把`emoji`当做普通字体一样操作，更方便。
 
-这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，而`ggimage`支持映射，下面的例子中我们做了一个简单的回归分析，如果残差<0.5用笑脸表示，`>0.5`则用哭脸来表示。
+`emoGG`这个包提供了`geom_emoji`图层，虽然一次可以画出散点，但因为不支持`aes`映射，而`ggimage`所提供的`geom_emoji`则支持映射，下面的例子中我们做了一个简单的回归分析，如果残差<0.5用笑脸表示，`>0.5`则用哭脸来表示。
 
 ```r
 set.seed(123)
@@ -137,10 +137,7 @@ p <- ggplot(iris2, aes(x = Sepal.Length, y = Petal.Length)) +
   geom_abline(intercept = model$coefficients[1],
               slope = model$coefficients[2])
 
-baseurl <- "https://twemoji.maxcdn.com/72x72/"
-emoji <- paste0(baseurl, c("1f600", "1f622"), ".png")
-
-p + geom_image(aes(image = emoji[(abs(Petal.Length-fitted) > 0.5) + 1]))
+p + ggimage::geom_emoji(aes(image = ifelse(abs(Petal.Length-fitted) > 0.5, '1f622', '1f600')))
 ```
 
 ![](figures/emoji_residual2.png)
@@ -148,13 +145,14 @@ p + geom_image(aes(image = emoji[(abs(Petal.Length-fitted) > 0.5) + 1]))
 如果要用`emoGG`来做的话，则需要自己切数据分两次来进行：
 
 ```r
-p + geom_emoji(data=subset(iris2, (Petal.Length-fitted)<0.5), emoji="1f600") +
-    geom_emoji(data=subset(iris2, (Petal.Length-fitted)>0.5), emoji="1f622")
+p + emoGG::geom_emoji(data=subset(iris2, (Petal.Length-fitted)<0.5), emoji="1f600") +
+    emoGG::geom_emoji(data=subset(iris2, (Petal.Length-fitted)>0.5), emoji="1f622")
 ```
 
 这里我们只分两类(残差是否大于0.5)，所以需要加两次，试想我们的分类变量有多种可能的取值，则我们需要分多次切数据加图层，`CatterPlots`、`rphylopic`和`emoGG`都有这个问题，这也是`aes`映射之于`ggplot2`的重要和强大之处，它让我们可以在更高的抽像水平思考，
 
-__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。这里我也用`ggimage`来展示做图时加入国旗。
+__`ggflags`__是支持`aes`映射的，只不过它只能用来画国旗而已。同样`ggimage`也提供
+了相应的`geom_flag`来使用国旗用于做图。
 
 
 ```r
@@ -191,13 +189,9 @@ head(medals)
 首先我们从网站上爬回来2016年各个国家的奥林匹克奖牌数，画出柱状图，并在`xlab`国家名边上用`ggimage`画上国旗：
 
 ```r
-baseurl <- "https://behdad.github.io/region-flags/png/"
-flags <- paste0(baseurl, medals$code, ".png")
-names(flags) <- medals$code
-
 p <- ggplot(medals, aes(Country, count)) + geom_col(aes(fill=medal), width=.8)
 
-p + geom_image(y = -2, aes(image = flags[code])) +
+p + geom_flag(y = -2, aes(image = code)) +
     coord_flip() + expand_limits(y=-2)  +
     scale_fill_manual(values = c("Gold" = "gold", "Bronze" = "#cd7f32","Silver" = "#C0C0C0"))
 ```
@@ -206,7 +200,7 @@ p + geom_image(y = -2, aes(image = flags[code])) +
 
 ## `ggimage`
 
-前面我们介绍了`ggimage`在一些场景的应用实例，虽然有专门的包针对这些应用场景，但`ggimage`在这些领域中的表现要比大多数的包要好。但`ggimage`的使用并不限于这些。这里将展示一些有趣的例子。
+前面我们介绍了`ggimage`在一些场景的应用实例，虽然有专门的包针对这些应用场景，但`ggimage`在这些领域中的表现要比大多数的包要好（支持aes映射）。但`ggimage`的使用并不限于这些(`geom_phylopic`，`geom_emoji`和`geom_flag`只是通用图层`geom_image`的简单封装)，这里将展示一些有趣的例子。
 
 #### 用R图标来画R形状
 
@@ -245,7 +239,6 @@ crime <- read.csv("http://datasets.flowingdata.com/crimeRatesByState2005.tsv",
 
 ```r
 library(gtable)
-library(ggtree)
 
 plot_pie <- function(i) {
     df <- gather(crime[i,], type, value, murder:motor_vehicle_theft)
@@ -272,9 +265,9 @@ leg1 <- gtable_filter(
         ggplot_build(plot_pie(1) + theme(legend.position="right"))
     ), "guide-box")
 
-p <- ggplot(crime, aes(murder, Robbery)) +
-    geom_image(aes(image=pie, size=I(radius)))
-subview(p, leg1, x=8.8, y=50)
+ggplot(crime, aes(murder, Robbery)) +
+  geom_image(aes(image=pie, size=I(radius))) +
+  geom_subview(leg1, x=8.8, y=50)
 ```
 
 ![](figures/us_crime.png)
@@ -284,9 +277,9 @@ subview(p, leg1, x=8.8, y=50)
 ```r
 plot_crime <- function(i) {
     o <- paste0(i, ".png")
-    p <- ggplot(crime, aes(murder, Robbery)) + geom_blank() +
-        geom_image(data=crime[i,], aes(image=pie, size=I(radius)))
-    subview(p, leg1, x=8.8, y=50) + ggsave(o)
+    ggplot(crime, aes(murder, Robbery)) + geom_blank() +
+        geom_image(data=crime[i,], aes(image=pie, size=I(radius))) +
+        geom_subview(p, leg1, x=8.8, y=50) + ggsave(o)
     o
 }
 
@@ -319,7 +312,11 @@ SAS博客对`M&M`巧克力的[颜色分布做了分析](http://blogs.sas.com/con
 ![](figures/Screenshot3.png)
 
 
-`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，后续我有时间的话，会写一个`draw_key_image`的函数，实现使用图片来当legend key的功能，也会把`ggtree::subview`和`ggtree::phylopic`这些也搬过来。
+最近我还添加了`geom_pokemon`图层，让大家可以用pokemon来画图，比如：
+
+![](figures/geom_pokemon.png)
+
+`ggimage`是通用的包，所以可以被应用于不同的领域/场景中，起码可以让我们画出更好玩的图出来，后续我有时间的话，会写一个`draw_key_image`的函数，实现使用图片来当legend key的功能。
 
 
 最后祝大家玩得开心！不要把图画得太有魔性哦:)
